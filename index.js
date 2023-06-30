@@ -26,9 +26,10 @@ const secretKey = "jwtsecretkey"
 app.post("/register", async (req, res) =>{
  const{name, email, password} = req.body
  try{
-    const userDoc = await UserModel.create({name, email, password:bcrypt.hashSync(password, salt), todoList: []})
+    const userDoc = await UserModel.create({name, email, password:bcrypt.hashSync(password, salt), todoList: []},{ maxTimeMS: 30000 })
  } catch (e){
     console.log(e)
+    console.log("error when registering")
  }
 
  res.json("succes")
@@ -37,12 +38,13 @@ app.post("/register", async (req, res) =>{
 //get todo list when login
 app.post("/login", async (req,res)=>{
     const{name, password} = req.body
-    const userDoc = await UserModel.findOne({name})
+    const userDoc = await UserModel.findOne({name},{ maxTimeMS: 30000 })
 
     try{
         const passOk = bcrypt.compareSync(password, userDoc.password)
         if(!passOk){
             return res.json("failed")
+         console.log("error login")
     
         }else if(passOk){
             const payload = {
@@ -73,7 +75,7 @@ app.post("/validateToken", async (req, res)=> {
         const username = decoded.userName
         const authorization = decoded.authorized
 
-        const userDoc = await UserModel.findOne({name : username})
+        const userDoc = await UserModel.findOne({name : username},{ maxTimeMS: 30000 })
         const getTodo = userDoc.todoList
 
 
@@ -84,13 +86,13 @@ app.post("/validateToken", async (req, res)=> {
 app.post("/addTodo", async (req, res)=> {
     const{todo, username} = req.body
 
-    const userDoc = await UserModel.findOne({name : username})
+    const userDoc = await UserModel.findOne({name : username},{ maxTimeMS: 30000 })
 
     const result = await userDoc.updateOne({
         $push: {todoList : {task: todo}}
     })
 
-    const userDocResult = await UserModel.findOne({name : username})
+    const userDocResult = await UserModel.findOne({name : username},{ maxTimeMS: 30000 })
 
     getTodo = userDocResult.todoList
 
@@ -100,12 +102,12 @@ app.post("/addTodo", async (req, res)=> {
 app.post("/deleteTodo", async (req, res) => {
     const {id, username} = req.body
 
-    const userDoc = await UserModel.findOne({name: username})
+    const userDoc = await UserModel.findOne({name: username},{ maxTimeMS: 30000 })
     await userDoc.updateOne(
         {$pull : {todoList: {_id:id}}}
     )
 
-    const userDocResult = await UserModel.findOne({name : username})
+    const userDocResult = await UserModel.findOne({name : username},{ maxTimeMS: 30000 })
     getTodo = userDocResult.todoList
 
     res.json(getTodo)
