@@ -29,7 +29,6 @@ app.post("/register", async (req, res) =>{
     const userDoc = await UserModel.create({name, email, password:bcrypt.hashSync(password, salt), todoList: []})
  } catch (e){
     console.log(e)
-    console.log("error when registering")
  }
 
  res.json("succes")
