@@ -113,5 +113,9 @@ app.post("/deleteTodo", async (req, res) => {
     res.json(getTodo)
 })
 
+app.get("/test", (req, res) => {
+  res.write("test");
+  res.end();
+});
 
 app.listen(4000)
